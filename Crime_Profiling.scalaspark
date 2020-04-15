@@ -1,0 +1,11 @@
+val mydata = sc.textFile("BDADProject/NYPD_Complaint_Data_Historic.csv")
+mydata.count()
+
+//res: Long = 6847945
+
+val mydata1 = sc.textFile("BDADProject/Crime/part-*")
+mydata1.count()
+
+//res: Long = 184068
+
+//reason that different: I delete the first row that is the title and I reduce by key to count the number that each day, specific type of crime happens.
