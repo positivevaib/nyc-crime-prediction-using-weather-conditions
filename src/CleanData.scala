@@ -33,11 +33,8 @@ object CleanData {
 
     val cleanData = contentData.map(line => (line._1.split("T")(0), line._1.split("T")(1), line._2, checkWeather(line._3, "RA"), checkWeather(line._3, "SN"), checkWeather(line._3, "FG"), line._4))
 
-    // Reformat data to remove redundant chars and to add back updated header
+    // Reformat data to remove redundant chars
     var finalData = cleanData.map(line => (line._1.substring(1, 11), line._2.substring(0, 8), line._3.substring(1, line._3.length - 1), line._4, line._5, line._6, line._7.substring(1, line._7.length - 1)))
-
-    val newHeader = Array(("date", "time", "hourly  dry  bulb temperature", "rain", "snow", "fog", "hourly relative humidity"))
-    finalData = sc.parallelize(newHeader) ++ finalData 
 
     val trimFinalData = finalData.map(line => line.toString.substring(1, line.toString.length - 1))
 
@@ -60,7 +57,7 @@ object CleanData {
     val filterData = cleanData.filter(line => line(0) != "CMPLNT_FR_DT")
 
     // Reformat Data
-    val finalData = filterData.map(line => (line(0)+ "," + line(1) + "," + line(2)))
+    val finalData = filterData.map(line => (line(0) + "," + line(1) + "," + line(2)))
 
     // Save final version of cleaned data as text file
     finalData.saveAsTextFile(outPath)
