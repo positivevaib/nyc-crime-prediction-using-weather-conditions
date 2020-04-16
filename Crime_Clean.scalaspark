@@ -1,8 +1,0 @@
-val mydata = sc.textFile("BDADProject/NYPD_Complaint_Data_Historic.csv")
-val mydata2 = mydata.map(line => line.split(","))
-val mydata3 = mydata2.collect{case l if (l.length > 8) => List(l(1), l(8))}
-val mydata4 = mydata3.filter(line =>line(0) != "CMPLNT_FR_DT")
-val mydata5 = mydata4.map(line => (line, 1))
-val mydata6 = mydata5.reduceByKey(_ + _)
-val mydata7 = mydata6.map(line => line._1(0) + "," + line._1(1) + "," + line._2 )
-mydata7.saveAsTextFile("BDADProject/Crime")
