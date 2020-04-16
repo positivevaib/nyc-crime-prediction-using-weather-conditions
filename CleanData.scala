@@ -60,11 +60,7 @@ object CleanData {
     val filterData = cleanData.filter(line => line(0) != "CMPLNT_FR_DT")
 
     // Reformat Data
-    val reformatData = filterData.map(line => (line(0)+ "," + line(1) + "," + line(2)))
-
-    // Give new title
-    val newHeader = List("date", "time", "Crime-type")
-    val finalData = sc.parallelize(newHeader) ++ filterData
+    val finalData = filterData.map(line => (line(0)+ "," + line(1) + "," + line(2)))
 
     // Save final version of cleaned data as text file
     finalData.saveAsTextFile(outPath)
