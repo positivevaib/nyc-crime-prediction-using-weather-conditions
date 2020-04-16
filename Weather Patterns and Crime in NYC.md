@@ -15,9 +15,14 @@ When we found out the relationship between the weather and the crime rate, every
 ## 2. DATA
 New York is the most prosperous city in the United States, and even the most prosperous city in the world. it even has the reputation of the city that never sleeps. Prosperity brings not only wealth, but also more crime. New York City has a lot of crimes, giving us enough crime data to analyze. Moreover, there is a base station in Manhattan for various weather analysis, which gives us enough weather data for analysis.
 ### 2.1. Crime Data
-We collect crime data from NYC OpenData. The original dataset is about all the crime complaints reported to Police Department. And the data is from police department, so the dataset is reliable.
-### 2.2. Weather Data
+We collect crime data from NYC OpenData. The original dataset is about all the crime complaints reported to Police Department. And the data is from police department, so the dataset is reliable.It contains Randomly generated persistent ID for each complaint, Exact date of occurrence for the reported event and 32 more information about crime. Since we need to find out the relationship between weather, we only need the date, time, crime type and number of crime happened at that time.
+#### Data Schema:
+#### Cleaned Data:
 
+### 2.2. Weather Data
+NOAA is the national centers for environmental information, it contains all kind of different dataset in the world. For this project, we only need to use New York City's weather data. So we find the data in Local Climatological Data(LCD) part. 
+#### Data Schema:
+#### Cleaned Data:
 ## 3. ANALYSIS
 
 ## 4.CONCLUSION 
