@@ -13,7 +13,7 @@ In many cases, the police simply park the police car there, and then should wait
 When we found out the relationship between the weather and the crime rate, everything was solved. Through the continuous accumulation and analysis of historical data, we can analyze whether the current period of time in this area is the time of high crimes through the current weather conditions in this area. When it is analyzed that the crime rate is high, the police station can deploy in advance to release more police force, and when it is analyzed that the crime rate is low in this period today, the police station can arrange fewer police officers to patrol outside. Even passers-by can analyze to determine whether it is a suitable time to go out.
 
 ## 2. DATA
-New York City is the most prosperous city in the United States and even the world.
+New York is the most prosperous city in the United States, and even the most prosperous city in the world. it even has the reputation of the city that never sleeps. Prosperity brings not only wealth, but also more crime. New York City has a lot of crimes, giving us enough crime data to analyze. Moreover, there is a base station in Manhattan for various weather analysis, which gives us enough weather data for analysis.
 
 ## 3. ANALYSIS
 
