@@ -47,18 +47,25 @@ object CleanData {
 
   // Function to clean crime data and save to HDFS
   def cleanCrimeData(sc: SparkContext, inPath: String, outPath: String): Unit = {
+    // Import RDD Data
     val rawData = sc.textFile(inPath)
+
+    // Split the CSV data
     val splitData = rawData.map(line => line.split(","))
 
-    val cleanData = splitData.collect{case l if (l.length > 8) => List(l(1), l(8))}
+    // Get Data, Time, Crime_Type from Origin Data
+    val cleanData = splitData.collect{case l if (l.length > 8) => List(l(1), l(2), l(8))}
+
+    // Get rid of first line of Data
     val filterData = cleanData.filter(line => line(0) != "CMPLNT_FR_DT")
 
-    val mapData = filterData.map(line => (line, 1))
-    val reduceData = mapData.reduceByKey(_ + _)
+    // Reformat Data
+    val reformatData = filterData.map(line => (line(0)+ "," + line(1) + "," + line(2)))
 
-    // Reformat data
-    val finalData = reduceData.map(line => line._1(0) + "," + line._1(1) + "," + line._2 )
-  
+    // Give new title
+    val newHeader = List("date", "time", "Crime-type")
+    val finalData = sc.parallelize(newHeader) ++ filterData
+
     // Save final version of cleaned data as text file
     finalData.saveAsTextFile(outPath)
   }
