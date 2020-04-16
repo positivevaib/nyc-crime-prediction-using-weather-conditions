@@ -14,6 +14,8 @@ When we found out the relationship between the weather and the crime rate, every
 
 ## 2. DATA
 New York is the most prosperous city in the United States, and even the most prosperous city in the world. it even has the reputation of the city that never sleeps. Prosperity brings not only wealth, but also more crime. New York City has a lot of crimes, giving us enough crime data to analyze. Moreover, there is a base station in Manhattan for various weather analysis, which gives us enough weather data for analysis.
+### 2.1. Crime Data
+### 2.2. Weather Data
 
 ## 3. ANALYSIS
 
