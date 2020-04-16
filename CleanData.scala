@@ -45,9 +45,28 @@ object CleanData {
     trimFinalData.saveAsTextFile(outPath)
   }
 
+  // Function to clean crime data and save to HDFS
+  def cleanCrimeData(sc: SparkContext, inPath: String, outPath: String): Unit = {
+    val rawData = sc.textFile(inPath)
+    val splitData = rawData.map(line => line.split(","))
+
+    val cleanData = splitData.collect{case l if (l.length > 8) => List(l(1), l(8))}
+    val filterData = cleanData.filter(line => line(0) != "CMPLNT_FR_DT")
+
+    val mapData = filterData.map(line => (line, 1))
+    val reduceData = mapData.reduceByKey(_ + _)
+
+    // Reformat data
+    val finalData = reduceData.map(line => line._1(0) + "," + line._1(1) + "," + line._2 )
+  
+    // Save final version of cleaned data as text file
+    finalData.saveAsTextFile(outPath)
+  }
+
   def main(args: Array[String]) {
     val sc = new SparkContext()
 
-    cleanWeatherData(sc, "/user/vag273/project/weather_data.csv", "/user/vag273/project/weather_data")
+    cleanWeatherData(sc, "/user/vag273/project/weather_data", "/user/vag273/project/clean_weather_data")
+    cleanCrimeData(sc, "/user/vag273/project/crime_data", "/user/vag273/project/clean_crime_data")
   }
 }
