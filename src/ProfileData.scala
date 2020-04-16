@@ -2,7 +2,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 
 object ProfileData {
-  def profileData(sc: SparkContext, mode: String, rawPath: String, cleanPath: String): Unit {
+  def profileData(sc: SparkContext, mode: String, rawPath: String, cleanPath: String): Unit = {
     // Load raw and clean data
     val rawData = sc.textFile(rawPath)
     val cleanData = sc.textFile(cleanPath)
