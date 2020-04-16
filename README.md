@@ -1,9 +1,9 @@
 # nyc-crime-prediction-using-weather-conditions
 Predicting crimes in New York City using weather conditions.
 
-Data Schemas
+## Data Schemas
 
-Weather:
+### Weather:
 
 Date: String
 The date, in YYYY-MM-DD format, when the weather measurement was recorded.
@@ -26,7 +26,7 @@ yes/no entry indicating fog.
 Humidity: Int
 The relative humidity recorded.
 
-Crime:
+### Crime:
 
 Date: String
 The date, in DD-MM-YYYY format, when the crime was reported.
