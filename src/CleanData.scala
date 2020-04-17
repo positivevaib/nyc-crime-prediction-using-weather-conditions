@@ -54,10 +54,24 @@ object CleanData {
     val cleanData = splitData.collect{case l if (l.length > 8) => List(l(1), l(2), l(8))}
 
     // Get rid of first line of Data
-    val filterData = cleanData.filter(line => line(0) != "CMPLNT_FR_DT")
+    val filterData1 = cleanData.filter(line => line(0) != "CMPLNT_FR_DT")
+    val filterData2 = filterData1.filter(line => line(2).length > 0)
+
+    // Get all the Crime Type
+    val CrimeType = filterData2.map(line => line(2)).distinct()
+    val CrimeTypeArray = CrimeType.collect
+
+    // Change Crime Type to Number
+    val CrimeNumber = filterData2.map(line => List(line(0), line(1), CrimeTypeArray.indexOf(line(2)).toString))
+
+    // Change Date Format
+    val DateSplit = CrimeNumber.map(line => List(line(0).split("/")(2), line(0).split("/")(0), line(0).split("/")(1), line(1), line(2)))
+
+    // Change Time Format
+    val TimeSplit = DateSplit.map(line => List(line(0), line(1), line(2), (line(3).split(":")(0).toInt*60 +line(3).split(":")(1).toInt), line(4)))
 
     // Reformat Data
-    val finalData = filterData.map(line => (line(0) + "," + line(1) + "," + line(2)))
+    val finalData = TimeSplit.map(line => (line(0) + "," + line(1) + "," + line(2) + "," + line(3) + "," + line(4)))
 
     // Save final version of cleaned data as text file
     finalData.saveAsTextFile(outPath)
