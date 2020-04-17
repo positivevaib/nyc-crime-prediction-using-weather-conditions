@@ -62,10 +62,16 @@ object CleanData {
     val CrimeTypeArray = CrimeType.collect
 
     // Change Crime Type to Number
-    val CrimeNumber = filterData2.map(line => List(line(0), line(1), CrimeTypeArray.indexOf(line(2))))
+    val CrimeNumber = filterData2.map(line => List(line(0), line(1), CrimeTypeArray.indexOf(line(2)).toString))
+
+    // Change Date Format
+    val DateSplit = CrimeNumber.map(line => List(line(0).split("/")(2), line(0).split("/")(0), line(0).split("/")(1), line(1), line(2)))
+
+    // Change Time Format
+    val TimeSplit = DateSplit.map(line => List(line(0), line(1), line(2), (line(3).split(":")(0).toInt*60 +line(3).split(":")(1).toInt), line(4)))
 
     // Reformat Data
-    val finalData = CrimeNumber.map(line => (line(0) + "," + line(1) + "," + line(2)))
+    val finalData = TimeSplit.map(line => (line(0) + "," + line(1) + "," + line(2) + "," + line(3) + "," + line(4)))
 
     // Save final version of cleaned data as text file
     finalData.saveAsTextFile(outPath)
