@@ -29,12 +29,12 @@ The relative humidity recorded.
 ### Crime:
 
 Date: String
-The date, in DD-MM-YYYY format, when the crime was reported.
+The date, in three columns, Year, Month, day, indicate when the crime was reported.
 
 Time: String
-The time, in HH:MM:SS format, when the crime was reported.
+The time, in minutes format, such as 1am will be 60, indicate when the crime was reported.
 
-Crime Type: Int
+Crime Type: String
 The type of crime reported, each crime type related to an Int.
 #### Relationship Crime Type - Int
 DANGEROUS WEAPONS	0  
