@@ -31,7 +31,7 @@ object CleanData {
     val header = filterData.first()
     val contentData = filterData.filter(line => line != header)
 
-    val cleanData = contentData.map(line => (line._1.split("T")(0).split('-')(0), line._1.split("T")(0).split('-')(1), line._1.split("T")(0).split('-')(2), (line._1.split("T")(1).split(':')(0).toInt * 60) + (line._1.split("T")(1).split(":")(1).toInt), ((line._2.substring(1, line._2.length - 1).toInt + 5) / 10) * 10, checkWeather(line._3, "RA"), checkWeather(line._3, "SN"), checkWeather(line._3, "FG"), ((line._4.substring(1, line._4.length - 1).toInt + 5) / 10) * 10))
+    val cleanData = contentData.map(line => (line._1.split("T")(0).split('-')(0), line._1.split("T")(0).split('-')(1), line._1.split("T")(0).split('-')(2), (((line._1.split("T")(1).split(':')(0).toInt * 60) + (line._1.split("T")(1).split(":")(1).toInt) + 30) / 60) * 60, ((line._2.substring(1, line._2.length - 1).toInt + 5) / 10) * 10, checkWeather(line._3, "RA"), checkWeather(line._3, "SN"), checkWeather(line._3, "FG"), ((line._4.substring(1, line._4.length - 1).toInt + 5) / 10) * 10))
 
     // Reformat data to remove redundant chars
     var finalData = cleanData.map(line => (line._1.substring(1, 5), line._2, line._3, line._4, line._5, line._6, line._7, line._8, line._9))
@@ -67,7 +67,7 @@ object CleanData {
     val DateSplit = CrimeNumber.collect{case l if (l(0).split("/").length > 2) => List(l(0).split("/")(2), l(0).split("/")(0), l(0).split("/")(1), l(1), l(2))}
 
     // Change Time Format
-    val TimeSplit = DateSplit.collect{case line if (line(3).split(":").length > 2) => List(line(0), line(1), line(2), (line(3).split(":")(0).toInt*60 + line(3).split(":")(1).toInt), line(4))}
+    val TimeSplit = DateSplit.collect{case line if (line(3).split(":").length > 2) => List(line(0), line(1), line(2), (((line(3).split(":")(0).toInt*60 + line(3).split(":")(1).toInt) + 30) / 60) * 60, line(4))}
 
     // Reformat Data
     val finalData = TimeSplit.map(line => (line(0) + "," + line(1) + "," + line(2) + "," + line(3) + "," + line(4)))
