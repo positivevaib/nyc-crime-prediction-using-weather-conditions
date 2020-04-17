@@ -34,7 +34,7 @@ object CleanData {
     val cleanData = contentData.map(line => (line._1.split("T")(0).split('-')(0), line._1.split("T")(0).split('-')(1), line._1.split("T")(0).split('-')(2), (line._1.split("T")(1).split(':')(0).toInt * 60) + (line._1.split("T")(1).split(":")(1).toInt), ((line._2.substring(1, line._2.length - 1).toInt + 5) / 10) * 10, checkWeather(line._3, "RA"), checkWeather(line._3, "SN"), checkWeather(line._3, "FG"), ((line._4.substring(1, line._4.length - 1).toInt + 5) / 10) * 10))
 
     // Reformat data to remove redundant chars
-    var finalData = cleanData.map(line => (line._1.substring(1, 5), line._2, line._3, line._4, line._5, line._6, line._7))
+    var finalData = cleanData.map(line => (line._1.substring(1, 5), line._2, line._3, line._4, line._5, line._6, line._7, line._8, line._9))
     val trimFinalData = finalData.map(line => line.toString.substring(1, line.toString.length - 1))
 
     // Save final version of cleaned data as text file
