@@ -5,15 +5,13 @@ object CleanData {
   // Function to check if requested weather type was observed
   def checkWeather(observation: String, weather: String): String = {
     var code = observation.split('|')(0)
+    var numCode = "0"
 
     if (code.contains(weather)) {
-      code = "yes"
-    }
-    else {
-      code = "no"
+      numCode = "1"
     }
 
-    return code
+    return numCode
   }
 
   // Function to clean weather data and save to HDFS
