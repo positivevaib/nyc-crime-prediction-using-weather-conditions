@@ -4,7 +4,6 @@ import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.types.IntegerType
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.Row
-import spark.implicits._
 import org.apache.spark.ml.feature.VectorAssembler
 import org.apache.spark.ml.feature.StringIndexer
 import org.apache.spark.ml.classification.RandomForestClassifier
@@ -15,6 +14,7 @@ object ProfileData {
     val sqlCtx = new SQLContext(sc)
 
     import sqlCtx._
+    import sqlCtx.implicits._
 
     val weatherData = sc.textFile("/user/vag273/project/clean_weather_data")
     val wSplit = weatherData.map(line => line.split(',')).map(line => (line(0) + "," + line(1) + "," + line(2) + "," + line(3), line(4) + "," + line(5) + "," + line(6) + "," + line(7) + "," + line(8))).groupByKey.map(line => line._1 + "," + line._2.toList(0)).map(line => line.split(','))
