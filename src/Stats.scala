@@ -9,7 +9,7 @@ import org.apache.spark.ml.feature.VectorAssembler
 import org.apache.spark.ml.feature.StringIndexer
 import org.apache.spark.ml.classification.RandomForestClassifier
 
-object ProfileData {
+object Stats {
   def main(args: Array[String]) {
     val sc = new SparkContext()
     val sqlCtx = new SQLContext(sc)
