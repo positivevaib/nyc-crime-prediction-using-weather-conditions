@@ -35,7 +35,8 @@ object Analytics {
 
     val joinDF = castCDF.join(castWDF, castCDF("cyear") === castWDF("wyear") && castCDF("cmonth") === castWDF("wmonth") && castCDF("cday") === castWDF("wday") && castCDF("cminutes") === castWDF("wminutes"), "left").na.drop()
     joinDF.registerTempTable("table")
-    val trimDF = sqlCtx.sql("""SELECT * FROM table WHERE type = 3 LIMIT 70000""").union(sqlCtx.sql("""SELECT * FROM table WHERE type = 9 LIMIT 70000""")).union(sqlCtx.sql("""SELECT * FROM table WHERE type = 42 LIMIT 70000""")).union(sqlCtx.sql("""SELECT * FROM table WHERE type = 45 LIMIT 70000"""))
+    val trimDF = sqlCtx.sql("""SELECT * FROM table WHERE type = 3 OR type = 9 OR type = 13 OR type = 42 OR type = 45 OR type = 63""")
+    //val trimDF = sqlCtx.sql("""SELECT * FROM table WHERE type = 3 LIMIT 70000""").union(sqlCtx.sql("""SELECT * FROM table WHERE type = 9 LIMIT 70000""")).union(sqlCtx.sql("""SELECT * FROM table WHERE type = 42 LIMIT 70000""")).union(sqlCtx.sql("""SELECT * FROM table WHERE type = 45 LIMIT 70000"""))
 
     val cols = Array("temp", "rain", "snow", "fog", "humidity")
     val assembler = new VectorAssembler().setInputCols(cols).setOutputCol("features")
