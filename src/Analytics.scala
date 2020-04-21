@@ -19,8 +19,7 @@ object Analytics {
     import sqlCtx.implicits._
 
     val weatherData = sc.textFile("/user/vag273/project/clean_weather_data")
-    val wSplit = weatherData.map(line => line.split(',')).map(line => (line(0) + "," + line(1) + "," + line(2) + "," + line(3), line(4) + "," + line(5) + "," + line(6) + "," + line(7) + "," + line(8))).groupByKey.map(line => line._1 + "," + line._2.toList(0)).map(line => line.split(','))
-
+    val wSplit = weatherData.map(line => line.split(','))
 
     val wHeader = Seq("wyear", "wmonth", "wday", "wminutes", "temp", "rain", "snow", "fog", "humidity")
     val wDF = wSplit.map(line => (line(0), line(1), line(2), line(3), line(4), line(5), line(6), line(7), line(8))).toDF(wHeader: _*)
@@ -36,7 +35,6 @@ object Analytics {
     val joinDF = castCDF.join(castWDF, castCDF("cyear") === castWDF("wyear") && castCDF("cmonth") === castWDF("wmonth") && castCDF("cday") === castWDF("wday") && castCDF("cminutes") === castWDF("wminutes"), "left").na.drop()
     joinDF.registerTempTable("table")
     val trimDF = sqlCtx.sql("""SELECT * FROM table WHERE type = 3 OR type = 9 OR type = 13 OR type = 42 OR type = 45 OR type = 63""")
-    //val trimDF = sqlCtx.sql("""SELECT * FROM table WHERE type = 3 LIMIT 70000""").union(sqlCtx.sql("""SELECT * FROM table WHERE type = 9 LIMIT 70000""")).union(sqlCtx.sql("""SELECT * FROM table WHERE type = 42 LIMIT 70000""")).union(sqlCtx.sql("""SELECT * FROM table WHERE type = 45 LIMIT 70000"""))
 
     val cols = Array("temp", "rain", "snow", "fog", "humidity")
     val assembler = new VectorAssembler().setInputCols(cols).setOutputCol("features")
