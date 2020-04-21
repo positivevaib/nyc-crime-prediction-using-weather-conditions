@@ -2,7 +2,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 import org.apache.spark.ml.classification.RandomForestClassifier
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
-import org.apache.spark.ml.feature.StringIndexer
+import org.apache.spark.ml.feature.{IndexToString, StringIndexer}
 import org.apache.spark.ml.feature.VectorAssembler
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder}
@@ -35,7 +35,7 @@ object Analytics {
 
     val joinDF = castCDF.join(castWDF, castCDF("cyear") === castWDF("wyear") && castCDF("cmonth") === castWDF("wmonth") && castCDF("cday") === castWDF("wday") && castCDF("cminutes") === castWDF("wminutes"), "left").na.drop()
     joinDF.registerTempTable("table")
-    val trimDF = spark.sql("""SELECT * FROM table WHERE type = 3 OR type = 4 OR type = 8 OR type = 9 OR type = 11 OR type = 13 OR type = 30 OR type = 31 OR type = 34 OR type = 42 OR type = 45 OR type = 50 OR type = 54 OR type = 55 OR type = 63""")
+    val trimDF = sqlCtx.sql("""SELECT * FROM table WHERE type = 3 LIMIT 70000""").union(sqlCtx.sql("""SELECT * FROM table WHERE type = 9 LIMIT 70000""")).union(sqlCtx.sql("""SELECT * FROM table WHERE type = 42 LIMIT 70000""")).union(sqlCtx.sql("""SELECT * FROM table WHERE type = 45 LIMIT 70000"""))
 
     val cols = Array("temp", "rain", "snow", "fog", "humidity")
     val assembler = new VectorAssembler().setInputCols(cols).setOutputCol("features")
@@ -43,23 +43,21 @@ object Analytics {
 
     val seed = 5043
     val Array(trainData, testData) = trimDF.randomSplit(Array(0.8, 0.2), seed)
-    val randomForestClassifier = new RandomForestClassifier().setFeatureSubsetStrategy("auto").setSeed(seed)
+    val randomForestClassifier = new RandomForestClassifier().setMaxDepth(2).setNumTrees(128).setFeatureSubsetStrategy("auto").setImpurity("gini").setSubsamplingRate(0.8).setSeed(seed)
+
+    val labelConverter = new IndexToString().setInputCol("prediction").setOutputCol("plabel").setLabels(indexer.labels)
+
     val stages = Array(assembler, indexer, randomForestClassifier)
 
     val pipeline = new Pipeline().setStages(stages)
-
-    val paramGrid = new ParamGridBuilder().addGrid(randomForestClassifier.maxDepth, Array(4, 6, 8)).addGrid(randomForestClassifier.impurity, Array("entropy", "gini")).addGrid(randomForestClassifier.numTrees, Array(100, 150, 200)).build()
+    val pipelineModel = pipeline.fit(trainData)
+    pipelineModel.write.overwrite().save("/user/vag273/project/model")
 
     val evaluator = new MulticlassClassificationEvaluator().setLabelCol("label").setPredictionCol("prediction").setMetricName("accuracy")
 
-    val cv = new CrossValidator().setEstimator(pipeline).setEvaluator(evaluator).setEstimatorParamMaps(paramGrid).setNumFolds(5)
-    val cvModel = cv.fit(trainData)
-
     val predictDF = cvModel.transform(testData)
 
-    val accuracy = evaluator.evaluate(predictDF) * 100
-    println("accuracy: " + accuracy + "%") 
-
-    cvModel.write.overwrite().save("/user/vag273/project/model")
+    val accuracy = evaluator.evaluate(predictDF)
+    println("accuracy: " + accuracy)
   }
 }
