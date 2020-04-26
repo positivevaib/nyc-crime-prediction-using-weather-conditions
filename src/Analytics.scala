@@ -1,11 +1,8 @@
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
-import org.apache.spark.ml.classification.RandomForestClassifier
-import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
-import org.apache.spark.ml.feature.{IndexToString, StringIndexer}
 import org.apache.spark.ml.feature.VectorAssembler
 import org.apache.spark.ml.Pipeline
-import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder}
+import org.apache.spark.ml.regression.LinearRegression
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.types.IntegerType
@@ -17,6 +14,9 @@ object Analytics {
 
     import sqlCtx._
     import sqlCtx.implicits._
+
+    // Data preparation
+    println("Preparing data")
 
     val weatherData = sc.textFile("/user/vag273/project/clean_weather_data")
     val wSplit = weatherData.map(line => line.split(','))
@@ -33,30 +33,107 @@ object Analytics {
     val castCDF = cDF.select(cDF("cyear").cast(IntegerType).as("cyear"), cDF("cmonth").cast(IntegerType).as("cmonth"), cDF("cday").cast(IntegerType).as("cday"), cDF("cminutes").cast(IntegerType).as("cminutes"), cDF("type").cast(IntegerType).as("type")).filter("cyear >= 2006").filter("cyear <= 2017")
 
     val joinDF = castCDF.join(castWDF, castCDF("cyear") === castWDF("wyear") && castCDF("cmonth") === castWDF("wmonth") && castCDF("cday") === castWDF("wday") && castCDF("cminutes") === castWDF("wminutes"), "left").na.drop()
-    joinDF.registerTempTable("table")
-    val trimDF = sqlCtx.sql("""SELECT * FROM table WHERE type = 3 OR type = 9 OR type = 13 OR type = 42 OR type = 45 OR type = 63""")
 
-    val cols = Array("temp", "rain", "snow", "fog", "humidity")
+    // Prediction data
+    println("Preparing prediction data")
+
+    var featStr = ""
+    for (temp <- 0 to 100 by 10) {
+      for (rain <- 0 to 1) {
+        for (snow <- 0 to 1) {
+          for (fog <- 0 to 1) {
+            for (humid <- 10 to 100 by 10) {
+              featStr += temp + "," + temp * temp + "," + rain + "," + snow + "," + fog + "," + humid + "," + humid * humid + "\n"
+    }}}}}
+    
+    val featRDD = sc.parallelize(featStr.split("\n")).map(line => line.split(','))
+    val featHeader = Seq("temp", "temp2", "rain", "snow", "fog", "humidity", "humidity2")
+    val featDF = featRDD.map(line => (line(0), line(1), line(2), line(3), line(4), line(5), line(6))).toDF(featHeader: _*)
+    val castFDF = featDF.select(featDF("temp").cast(IntegerType).as("temp"), featDF("temp2").cast(IntegerType).as("temp2"), featDF("rain").cast(IntegerType).as("rain"), featDF("snow").cast(IntegerType).as("snow"), featDF("fog").cast(IntegerType).as("fog"), featDF("humidity").cast(IntegerType).as("humidity"), featDF("humidity2").cast(IntegerType).as("humidity2"))
+
+    // Linear regression - Overall crime
+    println("Overall crime")
+
+    var lrRDD = joinDF.rdd.map(line => (line(9) + "," + line(10) + "," + line(11) + "," + line(12) + "," + line(13), 1)).reduceByKey(_ + _).map(line => line.toString.substring(1, line.toString.length - 1).split(','))
+
+    val lrHeader = Seq("temp", "temp2", "rain", "snow", "fog", "humidity", "humidity2", "freq")
+    var lrDF = lrRDD.map(line => (line(0), line(0).toInt*line(0).toInt, line(1), line(2), line(3), line(4), line(4).toInt*line(4).toInt, line(5))).toDF(lrHeader: _*)
+    var castLrDF = lrDF.select(lrDF("temp").cast(IntegerType).as("temp"), lrDF("temp2").cast(IntegerType).as("temp2"), lrDF("rain").cast(IntegerType).as("rain"), lrDF("snow").cast(IntegerType).as("snow"), lrDF("fog").cast(IntegerType).as("fog"), lrDF("humidity").cast(IntegerType).as("humidity"), lrDF("humidity2").cast(IntegerType).as("humidity2"), lrDF("freq").cast(IntegerType).as("freq"))
+  
+    val cols = Array("temp", "temp2", "rain", "snow", "fog", "humidity", "humidity2")
     val assembler = new VectorAssembler().setInputCols(cols).setOutputCol("features")
-    val indexer = new StringIndexer().setInputCol("type").setOutputCol("label")
+    var featuresDF = assembler.transform(castLrDF)
 
     val seed = 5043
-    val Array(trainData, testData) = trimDF.randomSplit(Array(0.8, 0.2), seed)
-    val randomForestClassifier = new RandomForestClassifier().setMaxDepth(2).setNumTrees(128).setFeatureSubsetStrategy("auto").setImpurity("gini").setSubsamplingRate(0.8).setSeed(seed)
+    var Array(trainData, testData) = featuresDF.randomSplit(Array(0.7, 0.3), seed)
+    val lr = new LinearRegression().setFeaturesCol("features").setLabelCol("freq")
 
-    val labelConverter = new IndexToString().setInputCol("prediction").setOutputCol("plabel").setLabels(indexer.labels)
+    var lrModel = lr.fit(featuresDF)
+    lrModel.write.overwrite().save("/user/vag273/project/lr_overall")
 
-    val stages = Array(assembler, indexer, randomForestClassifier)
+    var trainSummary = lrModel.summary
+    println("R2: " + trainSummary.r2)
 
-    val pipeline = new Pipeline().setStages(stages)
-    val pipelineModel = pipeline.fit(trainData)
-    pipelineModel.write.overwrite().save("/user/vag273/project/model")
+    var preds = lrModel.transform(assembler.transform(castFDF)).rdd.map(line => line(0) + "," + line(2) + "," + line(3) + "," + line(4) + "," + line(5) + "," + line(7)).saveAsTextFile("/user/vag273/project/preds_overall")
 
-    val evaluator = new MulticlassClassificationEvaluator().setLabelCol("label").setPredictionCol("prediction").setMetricName("accuracy")
+    // Linear regression - Burglary
+    println("Burglary")
 
-    val predictDF = cvModel.transform(testData)
+    lrRDD = joinDF.rdd.filter(line => line(4) == 3).map(line => (line(9) + "," + line(10) + "," + line(11) + "," + line(12) + "," + line(13), 1)).reduceByKey(_ + _).map(line => line.toString.substring(1, line.toString.length - 1).split(','))
 
-    val accuracy = evaluator.evaluate(predictDF)
-    println("accuracy: " + accuracy)
+    lrDF = lrRDD.map(line => (line(0), line(0).toInt*line(0).toInt, line(1), line(2), line(3), line(4), line(4).toInt*line(4).toInt, line(5))).toDF(lrHeader: _*)
+    castLrDF = lrDF.select(lrDF("temp").cast(IntegerType).as("temp"), lrDF("temp2").cast(IntegerType).as("temp2"), lrDF("rain").cast(IntegerType).as("rain"), lrDF("snow").cast(IntegerType).as("snow"), lrDF("fog").cast(IntegerType).as("fog"), lrDF("humidity").cast(IntegerType).as("humidity"), lrDF("humidity2").cast(IntegerType).as("humidity2"), lrDF("freq").cast(IntegerType).as("freq"))
+  
+    featuresDF = assembler.transform(castLrDF)
+
+    Array(trainData, testData) = featuresDF.randomSplit(Array(0.7, 0.3), seed)
+
+    lrModel = lr.fit(featuresDF)
+    lrModel.write.overwrite().save("/user/vag273/project/lr_burglary")
+
+    trainSummary = lrModel.summary
+    println("R2: " + trainSummary.r2)
+
+    preds = lrModel.transform(assembler.transform(castFDF)).rdd.map(line => line(0) + "," + line(2) + "," + line(3) + "," + line(4) + "," + line(5) + "," + line(7)).saveAsTextFile("/user/vag273/project/preds_burglary")
+
+    // Linear regression - Assault
+    println("Assault")
+
+    lrRDD = joinDF.rdd.filter(line => line(4) == 9).map(line => (line(9) + "," + line(10) + "," + line(11) + "," + line(12) + "," + line(13), 1)).reduceByKey(_ + _).map(line => line.toString.substring(1, line.toString.length - 1).split(','))
+
+    lrDF = lrRDD.map(line => (line(0), line(0).toInt*line(0).toInt, line(1), line(2), line(3), line(4), line(4).toInt*line(4).toInt, line(5))).toDF(lrHeader: _*)
+    castLrDF = lrDF.select(lrDF("temp").cast(IntegerType).as("temp"), lrDF("temp2").cast(IntegerType).as("temp2"), lrDF("rain").cast(IntegerType).as("rain"), lrDF("snow").cast(IntegerType).as("snow"), lrDF("fog").cast(IntegerType).as("fog"), lrDF("humidity").cast(IntegerType).as("humidity"), lrDF("humidity2").cast(IntegerType).as("humidity2"), lrDF("freq").cast(IntegerType).as("freq"))
+  
+    featuresDF = assembler.transform(castLrDF)
+
+    Array(trainData, testData) = featuresDF.randomSplit(Array(0.7, 0.3), seed)
+
+    lrModel = lr.fit(featuresDF)
+    lrModel.write.overwrite().save("/user/vag273/project/lr_assault")
+
+    trainSummary = lrModel.summary
+    println("R2: " + trainSummary.r2)
+
+    preds = lrModel.transform(assembler.transform(castFDF)).rdd.map(line => line(0) + "," + line(2) + "," + line(3) + "," + line(4) + "," + line(5) + "," + line(7)).saveAsTextFile("/user/vag273/project/preds_assault")
+
+    // Linear regression - Rape 
+    println("Rape")
+
+    lrRDD = joinDF.rdd.filter(line => line(4) == 45).map(line => (line(9) + "," + line(10) + "," + line(11) + "," + line(12) + "," + line(13), 1)).reduceByKey(_ + _).map(line => line.toString.substring(1, line.toString.length - 1).split(','))
+
+    lrDF = lrRDD.map(line => (line(0), line(0).toInt*line(0).toInt, line(1), line(2), line(3), line(4), line(4).toInt*line(4).toInt, line(5))).toDF(lrHeader: _*)
+    castLrDF = lrDF.select(lrDF("temp").cast(IntegerType).as("temp"), lrDF("temp2").cast(IntegerType).as("temp2"), lrDF("rain").cast(IntegerType).as("rain"), lrDF("snow").cast(IntegerType).as("snow"), lrDF("fog").cast(IntegerType).as("fog"), lrDF("humidity").cast(IntegerType).as("humidity"), lrDF("humidity2").cast(IntegerType).as("humidity2"), lrDF("freq").cast(IntegerType).as("freq"))
+  
+    featuresDF = assembler.transform(castLrDF)
+
+    Array(trainData, testData) = featuresDF.randomSplit(Array(0.7, 0.3), seed)
+
+    lrModel = lr.fit(featuresDF)
+    lrModel.write.overwrite().save("/user/vag273/project/lr_assault")
+
+    trainSummary = lrModel.summary
+    println("R2: " + trainSummary.r2)
+
+    preds = lrModel.transform(assembler.transform(castFDF)).rdd.map(line => line(0) + "," + line(2) + "," + line(3) + "," + line(4) + "," + line(5) + "," + line(7)).saveAsTextFile("/user/vag273/project/preds_rape")
   }
 }

@@ -1,13 +1,15 @@
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
+import org.apache.spark.ml.classification.RandomForestClassifier
+import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
+import org.apache.spark.ml.feature.{IndexToString, StringIndexer}
 import org.apache.spark.ml.feature.VectorAssembler
 import org.apache.spark.ml.Pipeline
-import org.apache.spark.ml.regression.LinearRegression
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.types.IntegerType
 
-object Analytics {
+object Classification {
   def main(args: Array[String]) {
     val sc = new SparkContext()
     val sqlCtx = new SQLContext(sc)
@@ -30,25 +32,30 @@ object Analytics {
     val castCDF = cDF.select(cDF("cyear").cast(IntegerType).as("cyear"), cDF("cmonth").cast(IntegerType).as("cmonth"), cDF("cday").cast(IntegerType).as("cday"), cDF("cminutes").cast(IntegerType).as("cminutes"), cDF("type").cast(IntegerType).as("type")).filter("cyear >= 2006").filter("cyear <= 2017")
 
     val joinDF = castCDF.join(castWDF, castCDF("cyear") === castWDF("wyear") && castCDF("cmonth") === castWDF("wmonth") && castCDF("cday") === castWDF("wday") && castCDF("cminutes") === castWDF("wminutes"), "left").na.drop()
-    val lrRDD = joinDF.rdd.map(line => (line(9) + "," + line(10) + "," + line(11) + "," + line(12) + "," + line(13), 1)).reduceByKey(_ + _).map(line => line.toString.substring(1, line.toString.length - 1).split(','))
-    val lrHeader = Seq("temp", "rain", "snow", "fog", "humidity", "freq")
-    val lrDF = lrRDD.map(line => (line(0), line(1), line(2), line(3), line(4), line(5))).toDF(lrHeader: _*)
-    val castLrDF = lrDF.select(lrDF("temp").cast(IntegerType).as("temp"), lrDF("rain").cast(IntegerType).as("rain"), lrDF("snow").cast(IntegerType).as("snow"), lrDF("fog").cast(IntegerType).as("fog"), lrDF("humidity").cast(IntegerType).as("humidity"), lrDF("freq").cast(IntegerType).as("freq"))
+    joinDF.registerTempTable("table")
+    val trimDF = sqlCtx.sql("""SELECT * FROM table WHERE type = 3 OR type = 9 OR type = 13 OR type = 42 OR type = 45 OR type = 63""")
 
     val cols = Array("temp", "rain", "snow", "fog", "humidity")
     val assembler = new VectorAssembler().setInputCols(cols).setOutputCol("features")
-    val featuresDF = assembler.transform(castLrDF)
+    val indexer = new StringIndexer().setInputCol("type").setOutputCol("label")
 
     val seed = 5043
-    val Array(trainData, testData) = featuresDF.randomSplit(Array(0.7, 0.3), seed)
-    val lr = new LinearRegression().setFeaturesCol("features").setLabelCol("freq").setMaxIter(10).setRegParam(0.3).setElasticNetParam(0.8)
+    val Array(trainData, testData) = trimDF.randomSplit(Array(0.8, 0.2), seed)
+    val randomForestClassifier = new RandomForestClassifier().setMaxDepth(2).setNumTrees(128).setFeatureSubsetStrategy("auto").setImpurity("gini").setSubsamplingRate(0.8).setSeed(seed)
 
-    val lrModel = lr.fit(featuresDF)
-    lrModel.write.overwrite().save("/user/vag273/project/model")
+    val labelConverter = new IndexToString().setInputCol("prediction").setOutputCol("plabel").setLabels(indexer.labels)
 
-    val trainSummary = lrModel.summary
-    println(trainSummary.r2)
+    val stages = Array(assembler, indexer, randomForestClassifier)
 
-    val predictDF = lrModel.transform(testData)
+    val pipeline = new Pipeline().setStages(stages)
+    val pipelineModel = pipeline.fit(trainData)
+    pipelineModel.write.overwrite().save("/user/vag273/project/model")
+
+    val evaluator = new MulticlassClassificationEvaluator().setLabelCol("label").setPredictionCol("prediction").setMetricName("accuracy")
+
+    val predictDF = pipelineModel.transform(testData)
+
+    val accuracy = evaluator.evaluate(predictDF)
+    println("accuracy: " + accuracy)
   }
 }
