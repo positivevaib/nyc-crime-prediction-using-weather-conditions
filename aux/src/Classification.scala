@@ -2,7 +2,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 import org.apache.spark.ml.classification.RandomForestClassifier
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
-import org.apache.spark.ml.feature.{IndexToString, StringIndexer}
+import org.apache.spark.ml.feature.StringIndexer
 import org.apache.spark.ml.feature.VectorAssembler
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.sql.DataFrame
@@ -43,13 +43,10 @@ object Classification {
     val Array(trainData, testData) = trimDF.randomSplit(Array(0.8, 0.2), seed)
     val randomForestClassifier = new RandomForestClassifier().setMaxDepth(2).setNumTrees(128).setFeatureSubsetStrategy("auto").setImpurity("gini").setSubsamplingRate(0.8).setSeed(seed)
 
-    val labelConverter = new IndexToString().setInputCol("prediction").setOutputCol("plabel").setLabels(indexer.labels)
-
     val stages = Array(assembler, indexer, randomForestClassifier)
 
     val pipeline = new Pipeline().setStages(stages)
     val pipelineModel = pipeline.fit(trainData)
-    pipelineModel.write.overwrite().save("/user/vag273/project/model")
 
     val evaluator = new MulticlassClassificationEvaluator().setLabelCol("label").setPredictionCol("prediction").setMetricName("accuracy")
 
