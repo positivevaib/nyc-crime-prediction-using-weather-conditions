@@ -48,7 +48,7 @@ The type of crime reported. Each unique type is identified by a numeric code, wh
 
 DANGEROUS WEAPONS                           0
 OFFENSES AGAINST MARRIAGE UNCL	            1
-POSSESSION OF STOLEN PROPERTY	            2
+POSSESSION OF STOLEN PROPERTY	              2
 BURGLARY	                                3
 LOITERING FOR DRUG PURPOSES	                4
 THEFT OF SERVICES	                        5
