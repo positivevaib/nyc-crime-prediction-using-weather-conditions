@@ -13,6 +13,7 @@ The independent variables included:
 The dependent variable was the number of complaints received by the NYPD regarding the crime of interest over the 12 year period from January 1, 2006 to December 31, 2017.  
 
 Thus, the models took the following form:  
+  
 **C = &theta;<sub>o</sub>temp + &theta;<sub>1</sub>temp<sup>2</sup> + &theta;<sub>2</sub>rain + &theta;<sub>3</sub>snow + &theta;<sub>4</sub>fog + &theta;<sub>5</sub>humidity + &theta;<sub>6</sub>humidity<sup>2</sup>**  
 
 The models' R2 values are listed below:  
