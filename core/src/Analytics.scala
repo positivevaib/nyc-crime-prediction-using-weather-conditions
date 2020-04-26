@@ -64,8 +64,6 @@ object Analytics {
     val assembler = new VectorAssembler().setInputCols(cols).setOutputCol("features")
     var featuresDF = assembler.transform(castLrDF)
 
-    val seed = 5043
-    var Array(trainData, testData) = featuresDF.randomSplit(Array(0.7, 0.3), seed)
     val lr = new LinearRegression().setFeaturesCol("features").setLabelCol("freq")
 
     var lrModel = lr.fit(featuresDF)
@@ -86,8 +84,6 @@ object Analytics {
   
     featuresDF = assembler.transform(castLrDF)
 
-    Array(trainData, testData) = featuresDF.randomSplit(Array(0.7, 0.3), seed)
-
     lrModel = lr.fit(featuresDF)
     lrModel.write.overwrite().save("/user/vag273/project/lr_burglary")
 
@@ -105,8 +101,6 @@ object Analytics {
     castLrDF = lrDF.select(lrDF("temp").cast(IntegerType).as("temp"), lrDF("temp2").cast(IntegerType).as("temp2"), lrDF("rain").cast(IntegerType).as("rain"), lrDF("snow").cast(IntegerType).as("snow"), lrDF("fog").cast(IntegerType).as("fog"), lrDF("humidity").cast(IntegerType).as("humidity"), lrDF("humidity2").cast(IntegerType).as("humidity2"), lrDF("freq").cast(IntegerType).as("freq"))
   
     featuresDF = assembler.transform(castLrDF)
-
-    Array(trainData, testData) = featuresDF.randomSplit(Array(0.7, 0.3), seed)
 
     lrModel = lr.fit(featuresDF)
     lrModel.write.overwrite().save("/user/vag273/project/lr_assault")
@@ -126,10 +120,8 @@ object Analytics {
   
     featuresDF = assembler.transform(castLrDF)
 
-    Array(trainData, testData) = featuresDF.randomSplit(Array(0.7, 0.3), seed)
-
     lrModel = lr.fit(featuresDF)
-    lrModel.write.overwrite().save("/user/vag273/project/lr_assault")
+    lrModel.write.overwrite().save("/user/vag273/project/lr_rape")
 
     trainSummary = lrModel.summary
     println("R2: " + trainSummary.r2)
