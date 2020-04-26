@@ -55,7 +55,14 @@ object CleanData {
 
     // Get all the Crime Type
     val CrimeType = filterData2.map(line => line(2)).distinct()
-    val CrimeTypeArray = CrimeType.collect
+    val CrimeTypeSort = CrimeType.sortBy(line => line)
+    val CrimeTypeArray = CrimeTypeSort.collect
+    CrimeTypeArray(3) = "BURGLARY"
+    CrimeTypeArray(9) = "FELONY ASSAULT"
+    CrimeTypeArray(45) = "RAPE"
+    CrimeTypeArray(11) = "ADMINISTRATIVE CODE"
+    CrimeTypeArray(21) = "ASSAULT 3 & RELATED OFFENSES"
+    CrimeTypeArray(62) = "NYS LAWS-UNCLASSIFIED VIOLATION"
 
     // Change Crime Type to Number
     val CrimeNumber = filterData2.map(line => List(line(0), line(1), CrimeTypeArray.indexOf(line(2)).toString))
