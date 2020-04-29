@@ -72,7 +72,8 @@ object Analytics {
     var trainSummary = lrModel.summary
     println("R2: " + trainSummary.r2)
 
-    var preds = lrModel.transform(assembler.transform(castFDF)).rdd.map(line => line(0) + "," + line(2) + "," + line(3) + "," + line(4) + "," + line(5) + "," + line(7)).saveAsTextFile("/user/vag273/project/preds_overall")
+    var preds = lrModel.transform(assembler.transform(castFDF)).rdd.map(line => line(0) + "," + line(2) + "," + line(3) + "," + line(4) + "," + line(5) + "," + line(8))
+    preds.saveAsTextFile("/user/vag273/project/preds_overall")
 
     // Linear regression - Burglary
     println("Burglary")
@@ -90,7 +91,8 @@ object Analytics {
     trainSummary = lrModel.summary
     println("R2: " + trainSummary.r2)
 
-    preds = lrModel.transform(assembler.transform(castFDF)).rdd.map(line => line(0) + "," + line(2) + "," + line(3) + "," + line(4) + "," + line(5) + "," + line(7)).saveAsTextFile("/user/vag273/project/preds_burglary")
+    preds = lrModel.transform(assembler.transform(castFDF)).rdd.map(line => line(0) + "," + line(2) + "," + line(3) + "," + line(4) + "," + line(5) + "," + line(8))
+    preds.saveAsTextFile("/user/vag273/project/preds_burglary")
 
     // Linear regression - Assault
     println("Assault")
@@ -108,7 +110,8 @@ object Analytics {
     trainSummary = lrModel.summary
     println("R2: " + trainSummary.r2)
 
-    preds = lrModel.transform(assembler.transform(castFDF)).rdd.map(line => line(0) + "," + line(2) + "," + line(3) + "," + line(4) + "," + line(5) + "," + line(7)).saveAsTextFile("/user/vag273/project/preds_assault")
+    preds = lrModel.transform(assembler.transform(castFDF)).rdd.map(line => line(0) + "," + line(2) + "," + line(3) + "," + line(4) + "," + line(5) + "," + line(8))
+    preds.saveAsTextFile("/user/vag273/project/preds_assault")
 
     // Linear regression - Rape 
     println("Rape")
@@ -126,6 +129,7 @@ object Analytics {
     trainSummary = lrModel.summary
     println("R2: " + trainSummary.r2)
 
-    preds = lrModel.transform(assembler.transform(castFDF)).rdd.map(line => line(0) + "," + line(2) + "," + line(3) + "," + line(4) + "," + line(5) + "," + line(7)).saveAsTextFile("/user/vag273/project/preds_rape")
+    preds = lrModel.transform(assembler.transform(castFDF)).rdd.map(line => line(0) + "," + line(2) + "," + line(3) + "," + line(4) + "," + line(5) + "," + line(8))
+    preds.saveAsTextFile("/user/vag273/project/preds_rape")
   }
 }
