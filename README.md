@@ -17,7 +17,7 @@ Thus, the models took the following form:
 **C = &theta;<sub>o</sub>temp + &theta;<sub>1</sub>temp<sup>2</sup> + &theta;<sub>2</sub>rain + &theta;<sub>3</sub>snow + &theta;<sub>4</sub>fog + &theta;<sub>5</sub>humidity + &theta;<sub>6</sub>humidity<sup>2</sup>**  
 
 The models' R2 values are listed below:  
-- Overall: 0.3037  
-- Assault: 0.3301  
-- Burglary: 0.2695  
-- Rape: 0.2137  
+- Overall: 0.4037  
+- Assault: 0.4185  
+- Burglary: 0.3717  
+- Rape: 0.2796    
