@@ -32,19 +32,19 @@ The relative humidity recorded.
 ### Crime:
 
 Year: Int     
-The year when the weather measurement was recorded.     
+The year when the complaint was filed.      
 
 Month: Int     
-The month when the weather measurement was recorded.     
+The month when the complaint was filed.       
 
 Day: Int     
-The day when the weather measurement was recorded.     
+The day when the complaint was filed.        
 
 Minute: Int     
-The minute when the weather measurement was recorded.     
+The minute when the complaint was filed.     
 
 Crime Type: Int      
-The type of crime reported. Each unique type is identified by a numeric code, which are listed below.     
+The type of crime reported. Each unique type is identified by a numeric code, which are listed below, along with the total count of that type of crime found in the data.     
 
 0 - "HOMICIDE-NEGLIGENT: 156                                              
 1 - "LOITERING/GAMBLING (CARDS: 242                                       
