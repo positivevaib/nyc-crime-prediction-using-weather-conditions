@@ -1,0 +1,96 @@
+<html>
+   <title>CRIME PREDICTION INPUT PAGE</title>
+   <style type="text/css">
+   .submit_btn{
+      width:140px;
+      height:36px;
+      line-height:18px;
+      font-size:20px;
+      color: white;
+      text-align: center;
+      background-color: lightslategray;
+      position:absolute;
+      left:200;
+      bottom:0;
+   }
+   .div1{
+      width: 500px;
+      height: 35px;
+      text-align: center;
+      line-height: 35px;
+      background-color: lightslategray;
+   }
+   .div2{
+      width: 200px;
+      height: 35px;
+      text-align: center;
+      line-height: 35px;
+      background-color: lightslategray;
+   }
+   .div3{
+      position:relative;
+   }
+   
+   </style>
+   <body style = "background-color:lightgray">
+      
+      <form action = "http://localhost:5000/input" method = "post">
+         <h1 style="border-bottom: 2px solid; width: 600px; color: lightslategrey;"><font size = "15" color = "white">NYC Crime Prediction</font></h1>
+         <div class = "div1">
+            <p> 
+               <font size = "5" color = "white">
+                  TEMPERATURE &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+               </font> 
+               <input type = "text" name = "temperature" oninput="value=value.replace(/[^\d]/g,'')">
+               <font size = "5" color = "white">
+                  F
+               </font> 
+            </p>
+         </div>
+         <div class = "div1">
+            <p> 
+               <font size = "5" color = "white">
+                  RELATED HUMIDITY &nbsp&nbsp
+               </font> 
+               <input type = "text" name = "humidity" oninput="value=value.replace(/[^\d]/g,'')">
+               <font size = "5" color = "white">
+                  %
+               </font> 
+            </p>
+         </div>
+         <div class = "div2">
+            <p> 
+               <font size = "5" color = "white">
+                  RAIN
+               </font> 
+               <input type = "checkbox" name = "rain" />
+            </p>
+         </div>
+         <div class = "div2">
+            <p> 
+               <font size = "5" color = "white">
+                  SNOW
+               </font> 
+               <input type = "checkbox" name = "snow" />
+            </p>
+         </div>
+         <div class = "div2">
+            <p> 
+               <font size = "5" color = "white">
+                  FOG
+               </font> 
+               <input type = "checkbox" name = "fog" />
+            </p>
+         </div>
+         <br></br>
+         
+         
+         
+         <div class = "div3">
+            <br></br>
+            <p><input type = "submit" class = "submit_btn" value = "PREDICT"  /></p>
+         </div>
+      </form>
+      
+   </body>
+</html>
