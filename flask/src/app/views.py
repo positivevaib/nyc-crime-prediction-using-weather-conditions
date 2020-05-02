@@ -19,6 +19,9 @@ def input():
    if request.method == 'POST':
       temp = request.form['temperature']
       humd = request.form['humidity']
+      
+      temp = str(int(round(float(temp)/10, 0)*10))
+      humd = str(int(round(float(humd)/10, 0)*10))
       if request.form.get('rain') == 'on':
          rain = '1'
       else:
@@ -31,9 +34,14 @@ def input():
          fog = '1'
       else:
          fog = '0'
-
-      WeatherString = str(int(round(float(temp)/10, 0)*10)) + ',' + rain + ',' + snow + ',' + fog + ',' + str(int(round(float(humd)/10, 0)*10))
       
+      WeatherString = str(int(round(float(temp)/10, 0)*10)) + ',' + rain + ',' + snow + ',' + fog + ',' + str(int(round(float(humd)/10, 0)*10))
+
+      if (humd != '10' and humd != '20' and humd != '30' and humd != '40' and humd != '50'
+          and humd != '60' and humd != '70' and humd != '80' and humd != '90' and humd != '100') or\
+              (temp != '0' and temp != '10' and temp != '20' and temp != '30' and temp != '40'
+               and temp != '50' and temp != '60' and temp != '70' and temp != '80' and temp != '90' and temp != '100'):
+         return redirect(url_for('error',name = humd))
 
       # Calculate Percentile for All Crime Type
       tmp = ''
@@ -130,3 +138,7 @@ def input():
 @app.route('/output/<Prank1>/<Prank2>/<Prank3>/<Prank4>')
 def output(Prank1, Prank2, Prank3, Prank4):
    return render_template('output.html', Prank1 = Prank1, Prank2 = Prank2, Prank3 = Prank3, Prank4 = Prank4)
+
+@app.route('/error/<name>')
+def error(name):
+   return render_template('error.html')

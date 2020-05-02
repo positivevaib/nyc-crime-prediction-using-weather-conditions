@@ -1,0 +1,41 @@
+<html>
+   <title>CRIME PREDICTION INPUT PAGE</title>
+   <style type="text/css">
+   .div1{
+      width: 700px;
+      height: 35px;
+      text-align: center;
+      line-height: 35px;
+      background-color: #4CA8D9;
+   }
+   
+   </style>
+   <body style = "background-color:#304E6C">
+      
+      <form action = "http://localhost:5000/input" method = "post">
+         <h1 style="border-bottom: 2px solid; width: 800px; color: #4CA8D9;"><font size = "15" color = "white">NYC Crime Prediction</font></h1>
+         <div class = "div1">
+            <p> 
+               <font size = "5" color = "white">
+                  Input Errors: There are one or several errors in input. 
+               </font> 
+            </p>
+         </div>
+         <div class = "div1">
+            <p> 
+               <font size = "5" color = "white">
+                  Temperature should be in range [0, 105]
+               </font> 
+            </p>
+         </div>
+         <div class = "div1">
+            <p> 
+               <font size = "5" color = "white">
+                  Humidity should be in range [6, 105]
+               </font> 
+            </p>
+         </div>
+      </form>
+      
+   </body>
+</html>

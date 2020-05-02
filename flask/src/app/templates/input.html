@@ -41,7 +41,7 @@
                <font size = "5" color = "white">
                   TEMPERATURE &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
                </font> 
-               <input type = "text" name = "temperature" />
+               <input type = "text" name = "temperature" oninput="value=value.replace(/[^\d]/g,'')">
                <font size = "5" color = "white">
                   F
                </font> 
@@ -52,7 +52,7 @@
                <font size = "5" color = "white">
                   RELATED HUMIDITY &nbsp&nbsp
                </font> 
-               <input type = "text" name = "humidity" />
+               <input type = "text" name = "humidity" oninput="value=value.replace(/[^\d]/g,'')">
                <font size = "5" color = "white">
                   %
                </font> 
